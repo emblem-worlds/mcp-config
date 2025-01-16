@@ -87,6 +87,12 @@
       "args": [
         "C:\\Users\\Romar\\Documents\\Cline\\MCP\\memory-server\\build\\index.js"
       ]
+    },
+    "sequential-thinking-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\Cline\\MCP\\github-server\\src\\sequentialthinking\\dist\\index.js"
+      ]
     }
   }
 }

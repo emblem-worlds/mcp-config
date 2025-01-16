@@ -12,3 +12,8 @@ Miniconda3-latest-Windows-x86_64.exe
 
 # Build directories
 */build/
+
+# Template files (allowed)
+!.env.template
+!cline-mcp-settings.template.json
+!claude-desktop-config.template.json

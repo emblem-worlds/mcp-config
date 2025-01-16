@@ -93,6 +93,12 @@
       "args": [
         "${MCP_MEMORY_SERVER_PATH}"
       ]
+    },
+    "sequential-thinking-server": {
+      "command": "node",
+      "args": [
+        "${MCP_SEQUENTIAL_THINKING_SERVER_PATH}"
+      ]
     }
   }
 }

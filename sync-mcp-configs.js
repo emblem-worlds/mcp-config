@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+require('./env-loader');
 
 // Paths to configuration files
 const configPaths = {
@@ -28,6 +29,62 @@ function writeConfig(filePath, config) {
   }
 }
 
+// Replace hardcoded paths with environment variables
+function templatePaths(config) {
+  const templatedConfig = JSON.parse(JSON.stringify(config));
+  
+  // Helper function to replace paths in args array
+  const replacePaths = (args) => {
+    return args.map(arg => {
+      if (typeof arg === 'string' && arg.includes('C:\\Users\\Romar\\Documents\\Cline\\MCP')) {
+        const relativePath = arg.replace('C:\\Users\\Romar\\Documents\\Cline\\MCP', '${MCP_ROOT}');
+        return relativePath.replace(/\\/g, '/');
+      }
+      if (typeof arg === 'string' && arg.includes('C:/Users/Romar')) {
+        return arg.replace('C:/Users/Romar', '${HOME}');
+      }
+      return arg;
+    });
+  };
+
+  // Process each server configuration
+  Object.keys(templatedConfig.mcpServers).forEach(serverName => {
+    const server = templatedConfig.mcpServers[serverName];
+    if (server.args) {
+      server.args = replacePaths(server.args);
+    }
+  });
+
+  return templatedConfig;
+}
+
+// Replace environment variables with actual values
+function resolvePaths(config) {
+  const resolvedConfig = JSON.parse(JSON.stringify(config));
+  
+  // Helper function to resolve paths in args array
+  const resolvePath = (path) => {
+    return path.replace(/\$\{([^}]+)\}/g, (match, key) => {
+      return process.env[key] || match;
+    });
+  };
+
+  // Process each server configuration
+  Object.keys(resolvedConfig.mcpServers).forEach(serverName => {
+    const server = resolvedConfig.mcpServers[serverName];
+    if (server.args) {
+      server.args = server.args.map(arg => {
+        if (typeof arg === 'string') {
+          return resolvePath(arg);
+        }
+        return arg;
+      });
+    }
+  });
+
+  return resolvedConfig;
+}
+
 // Main sync function
 function syncConfigs() {
   // Read all configs
@@ -40,16 +97,20 @@ function syncConfigs() {
     return;
   }
 
-  // Get the most complete configuration (VSCode as source of truth)
-  const sourceConfig = vscodeConfig.mcpServers;
+  // Template the paths in the source config
+  const templatedConfig = templatePaths(vscodeConfig);
+  
+  // Update other configs with templated version
+  desktopConfig.mcpServers = templatedConfig.mcpServers;
+  cliConfig.mcpServers = templatedConfig.mcpServers;
 
-  // Update other configs
-  desktopConfig.mcpServers = sourceConfig;
-  cliConfig.mcpServers = sourceConfig;
-
-  // Write updated configs
+  // Write templated configs
+  writeConfig(configPaths.vscode, templatedConfig);
   writeConfig(configPaths.desktop, desktopConfig);
   writeConfig(configPaths.cli, cliConfig);
+
+  // Create a template file for reference
+  writeConfig('cline-mcp-settings.template.json', templatedConfig);
 }
 
 // Run sync
