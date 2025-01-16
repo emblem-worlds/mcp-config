@@ -1,0 +1,20 @@
+{
+  "name": "puppeteer-server",
+  "version": "1.0.0",
+  "description": "MCP server for Puppeteer browser automation",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.7.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.1.1",
+    "@types/node": "^20.17.13",
+    "@types/puppeteer": "^5.4.7",
+    "typescript": "^5.7.3"
+  }
+}

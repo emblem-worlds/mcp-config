@@ -1,0 +1,28 @@
+# Ignore Node modules
+node_modules/
+
+# Ignore build artifacts
+build/
+dist/
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore system-specific paths
+AppData/
+Library/
+
+# Ignore large binary files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Ignore IDE specific files
+.vscode/
+.idea/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db

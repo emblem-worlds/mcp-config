@@ -1,0 +1,26 @@
+{
+  "type": "module",
+  "name": "spotify-server",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Spotify MCP server for playlist management",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "@types/spotify-web-api-node": "latest",
+    "axios": "latest",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "spotify-web-api-node": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "typescript": "latest"
+  }
+}

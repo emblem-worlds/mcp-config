@@ -1,0 +1,7 @@
+{
+  "name": "ollama-server",
+  "command": "go",
+  "args": ["run", "main.go"],
+  "env": {},
+  "description": "Ollama MCP server for local LLM inference"
+}

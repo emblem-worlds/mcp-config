@@ -1,0 +1,15 @@
+{
+  "name": "mcp-config-sync",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Syncs MCP server configurations between Claude desktop and VSCode",
+  "main": "sync-mcp-configs.js",
+  "scripts": {
+    "start": "node sync-mcp-configs.js",
+    "install-service": "node install-service.js",
+    "uninstall-service": "node uninstall-service.js"
+  },
+  "dependencies": {
+    "node-windows": "^1.0.0-beta.8"
+  }
+}

@@ -1,0 +1,3 @@
+# PowerShell Command Rules
+1. Use semicolon (;) instead of && for command chaining in PowerShell
+   Example: `conda activate env-name ; pip install package-name`
