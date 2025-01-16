@@ -2,3 +2,13 @@
 .env
 .env.local
 node_modules
+
+# Config files with sensitive data
+claude-desktop-config.json
+cline-mcp-settings.json
+
+# Large files
+Miniconda3-latest-Windows-x86_64.exe
+
+# Build directories
+*/build/
