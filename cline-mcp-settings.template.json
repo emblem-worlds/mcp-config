@@ -1,5 +1,11 @@
 {
   "mcpServers": {
+    "rate-limit-server": {
+      "command": "node",
+      "args": [
+        "${MCP_RATE_LIMIT_SERVER_PATH}"
+      ]
+    },
     "knowledge-graph-server": {
       "command": "node",
       "args": [

@@ -1,5 +1,11 @@
 {
   "mcpServers": {
+    "rate-limit-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\Cline\\MCP\\rate-limit-server\\build\\index.js"
+      ]
+    },
     "knowledge-graph-server": {
       "command": "node",
       "args": [
