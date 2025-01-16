@@ -8,18 +8,34 @@ This repository contains configuration files for the Model Context Protocol (MCP
 mcp-config/
 ├── claude-cli/            # Configuration for Claude CLI interface
 │   └── mcp-config.json    # Main configuration file
+├── cline-mcp-settings.json # VSCode Cline MCP settings
+├── claude-desktop-config.json # Claude Desktop configuration
 ├── .gitignore             # Specifies intentionally untracked files
 └── README.md              # This documentation file
 ```
 
 ## Configuration Files
 
-### claude-cli/mcp-config.json
+### Configuration Files
+
+#### claude-cli/mcp-config.json
 The main configuration file containing settings for:
 - API endpoints
 - Authentication tokens (redacted)
 - Server configurations
 - Rate limiting settings
+
+#### cline-mcp-settings.json
+VSCode Cline extension settings including:
+- MCP server configurations
+- Development environment settings
+- Tool configurations
+
+#### claude-desktop-config.json
+Claude Desktop application settings including:
+- User preferences
+- Interface configurations
+- Integration settings
 
 ## Usage
 
