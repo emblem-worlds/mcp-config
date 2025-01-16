@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { config } from 'dotenv';
-import { Anthropic } from '@anthropic-ai/sdk';
+import { Anthropic, APIError } from '@anthropic-ai/sdk';
 import * as readline from 'readline';
 import * as path from 'path';
 import * as fs from 'fs/promises';
@@ -11,6 +11,11 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
 config({ path: path.join(new URL('.', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1'), '../.env') });
+
+// Load MCP config with environment variables
+import { loadConfig } from './env-loader.js';
+const mcpConfigPath = 'C:/Users/Romar/AppData/Roaming/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json';
+const mcpConfig = await loadConfig(mcpConfigPath);
 
 const program = new Command();
 
@@ -24,8 +29,8 @@ async function initMcpClients() {
     env?: Record<string, string>;
   }
 
-  // Use Claude desktop config
-  const mcpConfigPath = 'C:/Users/Romar/AppData/Roaming/Claude/claude_desktop_config.json';
+  // Use Cline settings config
+  const mcpConfigPath = 'C:/Users/Romar/AppData/Roaming/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json';
   const mcpConfig = JSON.parse(await fs.readFile(mcpConfigPath, 'utf-8'));
   const serverConfigs: Record<string, ServerConfig> = mcpConfig.mcpServers;
 
@@ -66,14 +71,37 @@ if (!process.env.ANTHROPIC_API_KEY) {
   process.exit(1);
 }
 
-// Initialize Anthropic client with rate limiting
-const throttle = pThrottle({
-  limit: 20, // Reduce concurrent requests
-  interval: 60000 // 1 minute
-});
+// Rate limiting with persistent state
+interface RateLimitState {
+  minuteTokens: number;
+  dailyTokens: number;
+  lastMinuteReset: number;
+  lastDayReset: number;
+}
 
+async function checkRateLimit(tokens: number): Promise<boolean> {
+  try {
+    const response = await getClient('rate-limit-server').callTool({
+      name: 'check_rate_limit',
+      arguments: { tokens }
+    });
+    
+    if (response.content[0].text.includes('error')) {
+      const error = JSON.parse(response.content[0].text).error;
+      throw new Error(error);
+    }
+    
+    return true;
+  } catch (error: any) {
+    console.error('Rate limit check failed:', error.message);
+    throw error;
+  }
+}
+
+// Initialize Anthropic client with retries
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  maxRetries: 3
 });
 
 // Helper to estimate token count (rough approximation)
@@ -81,7 +109,7 @@ function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4); // Rough estimate: ~4 chars per token
 }
 
-// Throttled message creation with token management
+// Message types
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -109,27 +137,9 @@ interface MessageResponse {
   };
 }
 
-// Handle Deepseek API rate limits
-function handleDeepseekRateLimit(error: any): MessageResponse {
-  if (error.response?.data?.error?.type === 'rate_limit_error') {
-    return {
-      id: '',
-      content: [{ text: 'Deepseek rate limit exceeded. Please try again later.', type: 'text' }],
-      model: 'deepseek',
-      role: 'assistant',
-      type: 'message',
-      stop_reason: 'rate_limit',
-      stop_sequence: null,
-      usage: { input_tokens: 0, output_tokens: 0 },
-      error: error.response.data.error
-    };
-  }
-  throw error;
-}
-
-const createThrottledMessage = throttle(async (messages: Message[], isSimpleQuery = false): Promise<MessageResponse> => {
+const createThrottledMessage = async (messages: Message[], isSimpleQuery = false): Promise<MessageResponse> => {
   const model = isSimpleQuery ? 'claude-3-sonnet-20240229' : 'claude-3-opus-20240229';
-  const maxTokens = isSimpleQuery ? 256 : 512; // Reduced max tokens
+  const maxTokens = isSimpleQuery ? 256 : 512;
   
   // Calculate approximate token usage for messages
   const messageTokens = messages.reduce((total, msg) => {
@@ -138,8 +148,7 @@ const createThrottledMessage = throttle(async (messages: Message[], isSimpleQuer
   
   // Keep message history within limits
   let historyMessages = messages;
-  if (messageTokens > 2000) { // Conservative token budget for history
-    // Keep most recent messages that fit within budget
+  if (messageTokens > 2000) {
     historyMessages = [];
     let tokenCount = 0;
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -150,35 +159,48 @@ const createThrottledMessage = throttle(async (messages: Message[], isSimpleQuer
     }
   }
   
+  // Estimate total tokens needed
+  const totalTokens = messageTokens + maxTokens;
+  
   try {
-    return await anthropic.messages.create({
-      system: "Be concise.", // Minimized system prompt
+    // Check rate limits before making request
+    await checkRateLimit(totalTokens);
+    
+    const response = await anthropic.messages.create({
+      system: "Be concise.",
       model,
       max_tokens: maxTokens,
       messages: historyMessages
     });
-    } catch (error: any) {
-      if (model.includes('deepseek')) {
-        return handleDeepseekRateLimit(error);
-      }
+    
+    return response;
+  } catch (error: any) {
+    if (error instanceof APIError && error.status === 429) {
+      // Get retry-after from error headers if available
+      const retryAfter = error.headers?.['retry-after'];
+      const waitTime = retryAfter ? `${retryAfter} seconds` : 'a few minutes';
       
-      if (error.response && error.response.data.error.type === 'rate_limit_error') {
-        console.error('Rate Limit Exceeded:', error.response.data.error.message);
-        return {
-          id: '',
-          content: [{ text: 'Rate limit exceeded. Please try again later.', type: 'text' }],
-          model: model,
-          role: 'assistant',
-          type: 'message',
-          stop_reason: 'rate_limit',
-          stop_sequence: null,
-          usage: { input_tokens: 0, output_tokens: 0 },
-          error: error.response.data.error
-        };
-      }
-      throw error;
+      return {
+        id: '',
+        content: [{ 
+          text: `Rate limit exceeded. Please wait ${waitTime} before trying again. Consider reducing your prompt length or requested tokens.`,
+          type: 'text' 
+        }],
+        model,
+        role: 'assistant',
+        type: 'message',
+        stop_reason: 'rate_limit',
+        stop_sequence: null,
+        usage: { input_tokens: 0, output_tokens: 0 },
+        error: {
+          type: 'rate_limit_error',
+          message: error.message
+        }
+      };
+    }
+    throw error;
   }
-});
+};
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -469,5 +491,3 @@ program
     }
     rl.close();
   });
-
-program.parse();
