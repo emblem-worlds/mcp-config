@@ -1,0 +1,3 @@
+[submodule "github-server"]
+	path = github-server
+	url = https://github.com/emblem-worlds/github-server
