@@ -1,0 +1,92 @@
+{
+  "mcpServers": {
+    "knowledge-graph-server": {
+      "command": "node",
+      "args": [
+        "${MCP_KNOWLEDGE_GRAPH_SERVER_PATH}"
+      ]
+    },
+    "puppeteer-server": {
+      "command": "node",
+      "args": [
+        "${MCP_PUPPETEER_SERVER_PATH}"
+      ]
+    },
+    "mcp-installer": {
+      "command": "npx",
+      "args": [
+        "@anaisbetts/mcp-installer"
+      ]
+    },
+    "server-filesystem": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-filesystem",
+        "C:/Users/Romar"
+      ]
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "mcp/github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "server-brave-search": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+    "ollama-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\Cline\\MCP\\ollama-server\\build\\index.js"
+      ]
+    },
+    "spotify-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\Cline\\MCP\\spotify-server\\build\\index.js"
+      ],
+      "env": {
+        "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
+        "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}",
+        "SPOTIFY_REFRESH_TOKEN": "${SPOTIFY_REFRESH_TOKEN}"
+      }
+    },
+    "server-puppeteer": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-puppeteer",
+        "--rm",
+        "--init"
+      ],
+      "env": {
+        "DOCKER_CONTAINER": "${DOCKER_CONTAINER}"
+      }
+    },
+    "spotify-mcp": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\spotify-mcp\\server.js"
+      ]
+    },
+    "memory-server": {
+      "command": "node",
+      "args": [
+        "${MCP_MEMORY_SERVER_PATH}"
+      ]
+    }
+  }
+}

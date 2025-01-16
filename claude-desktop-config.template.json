@@ -1,0 +1,86 @@
+{
+  "mcpServers": {
+    "knowledge-graph-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\Cline\\MCP\\knowledge-graph-server\\build\\index.js"
+      ]
+    },
+    "puppeteer-server": {
+      "command": "node",
+      "args": [
+        "C:/Users/Romar/ModelContextProtocol/servers/puppeteer-server/build/index.js"
+      ]
+    },
+    "mcp-installer": {
+      "command": "npx",
+      "args": [
+        "@anaisbetts/mcp-installer"
+      ]
+    },
+    "server-filesystem": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-filesystem",
+        "C:/Users/Romar"
+      ]
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "mcp/github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here"
+      }
+    },
+    "server-brave-search": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "your_brave_api_key_here"
+      }
+    },
+    "ollama-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\Cline\\MCP\\ollama-server\\build\\index.js"
+      ]
+    },
+    "spotify-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\Cline\\MCP\\spotify-server\\build\\index.js"
+      ],
+      "env": {
+        "SPOTIFY_CLIENT_ID": "your_spotify_client_id_here",
+        "SPOTIFY_CLIENT_SECRET": "your_spotify_client_secret_here",
+        "SPOTIFY_REFRESH_TOKEN": "your_spotify_refresh_token_here"
+      }
+    },
+    "server-puppeteer": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-puppeteer",
+        "--rm",
+        "--init"
+      ],
+      "env": {
+        "DOCKER_CONTAINER": "true"
+      }
+    },
+    "memory-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Romar\\Documents\\Cline\\MCP\\memory-server\\build\\index.js"
+      ]
+    }
+  }
+}
